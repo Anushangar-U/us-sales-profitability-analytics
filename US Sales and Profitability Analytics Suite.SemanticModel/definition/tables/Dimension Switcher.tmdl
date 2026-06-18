@@ -1,0 +1,49 @@
+table 'Dimension Switcher'
+	lineageTag: ff5c00c5-b857-4d4b-9870-a24f55e21d80
+
+	column 'Dimension Switcher'
+		lineageTag: 529b4dd5-7790-4310-917c-4ed44fd7afa7
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'Dimension Switcher Order'
+
+		relatedColumnDetails
+			groupByColumn: 'Dimension Switcher Fields'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Dimension Switcher Fields'
+		isHidden
+		lineageTag: 183c1e60-6ea9-413f-b7dc-165f1e728fe6
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'Dimension Switcher Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Dimension Switcher Order'
+		isHidden
+		formatString: 0
+		lineageTag: a792ae2f-a4c3-4696-997e-fe92f99f1310
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Dimension Switcher' = calculated
+		mode: import
+		source =
+				{
+				    ("Region", NAMEOF('Superstore'[Region]), 0),
+				    ("Category", NAMEOF('Superstore'[Category]), 1),
+				    ("Segment", NAMEOF('Superstore'[Segment]), 2)
+				}
+
+	annotation PBI_Id = 7661ad11162c4361a2dd28fbcbf358f1
+

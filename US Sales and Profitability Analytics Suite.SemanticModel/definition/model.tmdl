@@ -1,0 +1,24 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-US
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 1
+
+annotation PBI_QueryOrder = ["Superstore","DimDate"]
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table Superstore
+ref table DateTableTemplate_c635da79-85e5-422b-9fc8-b3e8c1276282
+ref table LocalDateTable_a02c91c7-3ba4-4a4a-a63e-5063c5d65305
+ref table DimDate
+ref table LocalDateTable_9b180dd1-1454-4e92-a5d8-8de59e3a810a
+ref table 'Top N Selector'
+ref table 'Dimension Switcher'
+
+ref cultureInfo en-US
+

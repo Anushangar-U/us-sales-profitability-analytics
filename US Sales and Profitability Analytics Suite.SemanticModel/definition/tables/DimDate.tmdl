@@ -1,0 +1,66 @@
+table DimDate
+	lineageTag: 470c554b-7cf3-459e-840e-4c54299b70a3
+
+	column Date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: af75a2da-c79e-4017-ab34-62aaffa41d49
+		summarizeBy: none
+		sourceColumn: Date
+
+		variation Variation
+			isDefault
+			relationship: 6b8b1eb2-f989-4738-b9ea-a4182e62b5e6
+			defaultHierarchy: LocalDateTable_9b180dd1-1454-4e92-a5d8-8de59e3a810a.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Year
+		dataType: int64
+		formatString: 0
+		lineageTag: fb06ec5a-cc45-484c-af21-91d7c1c85b2c
+		summarizeBy: sum
+		sourceColumn: Year
+
+		annotation SummarizationSetBy = Automatic
+
+	column Month
+		dataType: int64
+		formatString: 0
+		lineageTag: 913696a6-5146-44d2-a750-74f138ac440b
+		summarizeBy: sum
+		sourceColumn: Month
+
+		annotation SummarizationSetBy = Automatic
+
+	column Month_name
+		dataType: string
+		lineageTag: e9b5eac1-785e-4d47-b9ee-4ca71f64f264
+		summarizeBy: none
+		sourceColumn: Month_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column Quater
+		dataType: int64
+		formatString: 0
+		lineageTag: bb6fbab6-a685-429b-a89b-fdb1bc944e67
+		summarizeBy: sum
+		sourceColumn: Quater
+
+		annotation SummarizationSetBy = Automatic
+
+	partition DimDate = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Databases("."),
+				    SuperstoreDB = Source{[Name="SuperstoreDB"]}[Data],
+				    dbo_DimDate = SuperstoreDB{[Schema="dbo",Item="DimDate"]}[Data]
+				in
+				    dbo_DimDate
+
+	annotation PBI_ResultType = Table
+

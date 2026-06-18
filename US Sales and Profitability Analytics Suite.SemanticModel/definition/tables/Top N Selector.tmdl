@@ -1,0 +1,26 @@
+table 'Top N Selector'
+	lineageTag: 6a612e96-79dc-4b93-ba95-45d220c8e815
+
+	measure 'Top N Selector Value' = SELECTEDVALUE('Top N Selector'[Top N Selector], 5)
+		formatString: 0
+		lineageTag: 6b2b3f26-68ca-4f60-b2f2-973ddd575ffc
+
+	column 'Top N Selector'
+		formatString: 0
+		lineageTag: 807d5a73-c7e7-4912-a85a-de1a42d3666b
+		summarizeBy: none
+		sourceColumn: [Value]
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 0
+				}
+
+		annotation SummarizationSetBy = User
+
+	partition 'Top N Selector' = calculated
+		mode: import
+		source = GENERATESERIES(1, 20, 1)
+
+	annotation PBI_Id = abe629a912aa46ea94b1e5c6eade54c9
+

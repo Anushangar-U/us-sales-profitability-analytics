@@ -1,0 +1,11 @@
+**/.pbi/localSettings.json
+**/.pbi/cache.abf
+
+# Ignore personal Power BI user layout and background cache files
+*.pbi/User.json
+*.pbi/cache.json
+.pbi/
+
+# Ignore local database model user settings
+*.dataset/*.user.json
+*.report/*.user.json

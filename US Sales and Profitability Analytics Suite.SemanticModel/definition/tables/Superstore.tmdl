@@ -1,0 +1,316 @@
+table Superstore
+	lineageTag: ea177934-c8e1-4d0c-a9a9-5420f7e6f6d9
+
+	measure 'Total Sales' = SUM(Superstore[Sales])
+		lineageTag: e754c5aa-09bc-4196-a174-43a13a1be170
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Profit' = SUM(Superstore[Profit])
+		lineageTag: dee0e471-1d94-4172-8977-fe349e065e9b
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Total Orders' = DISTINCTCOUNT(Superstore[Order_ID])
+		formatString: 0
+		lineageTag: adc8901f-0455-4a9d-acb9-390fe38577f9
+
+	measure 'Avg Order Value' = DIVIDE([Total Sales], [Total Orders])
+		lineageTag: fcbd6ef9-4a34-4c92-8bd7-95a3afc3d49b
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Profit Margin' = DIVIDE([Total Profit], [Total Sales])
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 9ab77538-621a-4657-aea4-15b017720f56
+
+	measure 'sales previous year' =
+			
+			CALCULATE(
+			    [Total Sales],
+			    ALL('DimDate'),
+			    'DimDate'[Year] = MAX('DimDate'[Year]) - 1,
+			    'DimDate'[Month] = MAX('DimDate'[Month])
+			)
+		lineageTag: ebf25505-d0d6-4d5e-9491-b9f8df6d0d70
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Year over year sales growth' = var salespy = [sales previous year] RETURN DIVIDE([Total Sales]-salespy,salespy)
+		lineageTag: f578c2f2-3d2e-4956-81c5-aa2216f27aee
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'months to date sales' = TOTALMTD([Total Sales],DimDate[Date])
+		lineageTag: bcee51de-75f7-4c63-8b8e-91d82030e765
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'sales 30d avg' = AVERAGEX(DATESINPERIOD(DimDate[Date],MAX(DimDate[Date]),-30,DAY),[Total Sales])
+		lineageTag: 2b08b1ba-eac3-4821-9203-1454787b8295
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Trend Title' = ```
+			
+			VAR SelectedYear = SELECTEDVALUE(DimDate[Year], "All Years")
+			RETURN
+			IF(
+			    SelectedYear = "All Years", 
+			    "Select a specific year to see YoY Growth", 
+			    "Monthly Sales in " & SelectedYear & " (YoY Growth: " & FORMAT([Year over year sales growth], "0.0%") & ")"
+			)
+			```
+		lineageTag: 3fa83d8e-b88a-4fd7-aa4b-7740ec3deb77
+
+	measure 'Selected Region Title' =
+			
+			VAR CurrentRegion = SELECTEDVALUE(Superstore[Region], "All Regions")
+			RETURN
+			    "Regional Detail: " & CurrentRegion
+		lineageTag: 91cf42e1-e67b-4a99-9467-5c1d57f8fe8d
+
+	measure 'Product rank' = RANKX(ALLSELECTED(Superstore[Product_Name]),[Total Sales],,DESC,Dense)
+		formatString: 0
+		lineageTag: c2f48ded-d4f2-49dd-9636-eabcde234924
+
+	measure 'is top N' =
+			
+			VAR selectedN = [Top N Selector Value]
+			RETURN if([Product rank]<selectedN,1,0)
+		formatString: 0
+		lineageTag: 96762535-ecab-4a42-8580-40d0ecda301e
+
+	measure 'Top N Title' =
+			
+			VAR N = [Top N Selector Value]
+			RETURN
+			    "Top " & N & " Products by Sales"
+		lineageTag: 9540713f-3f37-4d08-a450-6345e69f2148
+
+	measure 'Sales Target' =
+			
+			CALCULATE([Total Sales], SAMEPERIODLASTYEAR(DimDate[Date])) * 1.10
+		lineageTag: a1b04542-5e15-40d5-9ce8-088c9639ad00
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Best Month Label' = ```
+			
+			VAR BestMonth = TOPN(1, SUMMARIZE('DimDate', 'DimDate'[Month_name]), [Total Sales])
+			RETURN 
+			"🏆 Best: " & CONCATENATEX(BestMonth, [Month_name], ", ")
+			```
+		lineageTag: 701eb720-7b2d-4ee9-82b4-fd9ea14caaa2
+
+	measure 'Worst Month Label' = ```
+			
+			VAR WorstMonth = TOPN(1, SUMMARIZE('DimDate', 'DimDate'[Month_name]), [Total Sales], ASC)
+			RETURN 
+			"⚠️ Worst: " & CONCATENATEX(WorstMonth, [Month_name], ", ")
+			```
+		lineageTag: ed835661-7bff-449e-ba3d-41cfa8e4c062
+
+	column Row_ID
+		dataType: int64
+		formatString: 0
+		lineageTag: a44b3fce-af16-4099-9448-b38d2bf3492f
+		summarizeBy: count
+		sourceColumn: Row_ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column Order_ID
+		dataType: string
+		lineageTag: fce0af9c-07ea-4b34-96ba-21fd8d2637f4
+		summarizeBy: none
+		sourceColumn: Order_ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column Order_Date
+		dataType: dateTime
+		isHidden
+		formatString: Long Date
+		lineageTag: ccfb3159-2194-47f9-ae96-7643c54b6dfe
+		summarizeBy: none
+		sourceColumn: Order_Date
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Ship_Date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 566d7660-43a5-403a-8c9a-d7369054516c
+		summarizeBy: none
+		sourceColumn: Ship_Date
+
+		variation Variation
+			isDefault
+			relationship: 17559dc5-d051-4b5f-b046-fc5ee8cd65b8
+			defaultHierarchy: LocalDateTable_a02c91c7-3ba4-4a4a-a63e-5063c5d65305.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Ship_Mode
+		dataType: string
+		lineageTag: 5e1ead8e-b144-40a3-94af-7ed2e342307a
+		summarizeBy: none
+		sourceColumn: Ship_Mode
+
+		annotation SummarizationSetBy = Automatic
+
+	column Customer_ID
+		dataType: string
+		lineageTag: dafdd594-e0c4-4222-a701-6d46355aa77b
+		summarizeBy: none
+		sourceColumn: Customer_ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column Customer_Name
+		dataType: string
+		lineageTag: c49f2224-b87f-48a0-9b48-cbe26bed4ede
+		summarizeBy: none
+		sourceColumn: Customer_Name
+
+		annotation SummarizationSetBy = Automatic
+
+	column Segment
+		dataType: string
+		lineageTag: fd1e4a17-21a1-48fc-9753-3e93a5e09685
+		summarizeBy: none
+		sourceColumn: Segment
+
+		annotation SummarizationSetBy = Automatic
+
+	column Country
+		dataType: string
+		lineageTag: 7d1ee11d-fe59-45ea-b2f9-00d9a3bcc316
+		summarizeBy: none
+		sourceColumn: Country
+
+		annotation SummarizationSetBy = Automatic
+
+	column City
+		dataType: string
+		lineageTag: 60844e34-a08c-4919-b26b-4108c10856cc
+		summarizeBy: none
+		sourceColumn: City
+
+		annotation SummarizationSetBy = Automatic
+
+	column State
+		dataType: string
+		lineageTag: bfc2c219-9a5b-426a-bf9e-583f69f92333
+		summarizeBy: none
+		sourceColumn: State
+
+		annotation SummarizationSetBy = Automatic
+
+	column Postal_Code
+		dataType: int64
+		formatString: 0
+		lineageTag: 02fe7ef5-c934-4420-8db3-d9a0e4dcb74f
+		summarizeBy: count
+		sourceColumn: Postal_Code
+
+		annotation SummarizationSetBy = Automatic
+
+	column Region
+		dataType: string
+		lineageTag: bd902a74-bf85-4223-884e-1adead682e57
+		summarizeBy: none
+		sourceColumn: Region
+
+		annotation SummarizationSetBy = Automatic
+
+	column Product_ID
+		dataType: string
+		lineageTag: ed03ec12-43c4-4d28-aca4-9f735f396380
+		summarizeBy: none
+		sourceColumn: Product_ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column Category
+		dataType: string
+		lineageTag: 20953953-f14c-4f57-ace2-c177d987b235
+		summarizeBy: none
+		sourceColumn: Category
+
+		annotation SummarizationSetBy = Automatic
+
+	column Sub_Category
+		dataType: string
+		lineageTag: 5a194ab7-95fe-4ee7-ae96-d6a92ea12316
+		summarizeBy: none
+		sourceColumn: Sub_Category
+
+		annotation SummarizationSetBy = Automatic
+
+	column Product_Name
+		dataType: string
+		lineageTag: d2397b86-23e7-4f43-b786-91fc9b317b39
+		summarizeBy: none
+		sourceColumn: Product_Name
+
+		annotation SummarizationSetBy = Automatic
+
+	column Sales
+		dataType: double
+		lineageTag: 8b0484f6-3a68-4793-8d28-e25ddd0fb5d1
+		summarizeBy: sum
+		sourceColumn: Sales
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Quantity
+		dataType: int64
+		formatString: 0
+		lineageTag: e753864d-2674-4839-87e3-c036a328d180
+		summarizeBy: sum
+		sourceColumn: Quantity
+
+		annotation SummarizationSetBy = Automatic
+
+	column Discount
+		dataType: double
+		lineageTag: 9b741215-51af-4e2e-9b8e-bce1fca957b2
+		summarizeBy: sum
+		sourceColumn: Discount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Profit
+		dataType: double
+		lineageTag: 90810a75-1166-4224-b505-e9a77419a0ff
+		summarizeBy: sum
+		sourceColumn: Profit
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition Superstore = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Databases("."),
+				    SuperstoreDB = Source{[Name="SuperstoreDB"]}[Data],
+				    dbo_Superstore = SuperstoreDB{[Schema="dbo",Item="Superstore"]}[Data]
+				in
+				    dbo_Superstore
+
+	annotation PBI_ResultType = Table
+
