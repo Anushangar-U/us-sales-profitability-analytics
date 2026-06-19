@@ -1,7 +1,7 @@
 # US Sales and Profitability Analytics Suite
 
 A comprehensive Power BI analytics solution designed to provide deep insights into US sales performance, profitability metrics, and regional trends.
-
+https://github.com/Anushangar-U/us-sales-profitability-analytics/blob/main/US%20Sales%20and%20Profitability%20Analytics%20Suite.pdf
 ## 📋 Overview
 
 The **US Sales and Profitability Analytics Suite** is an enterprise-grade Power BI project that enables data-driven decision-making through interactive dashboards and detailed analytics. The suite provides a 360-degree view of sales operations, profit margins, and product performance across different regions.
